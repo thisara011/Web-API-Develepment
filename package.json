@@ -1,0 +1,12 @@
+{
+    "name": "web-api-workspace",
+    "version": "1.0.0",
+    "private": true,
+    "main": "WEB API/Web-API/index.js",
+    "scripts": {
+        "start": "node \"WEB API/Web-API/index.js\""
+    },
+    "dependencies": {
+        "express": "^5.2.1"
+    }
+}
