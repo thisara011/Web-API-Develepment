@@ -53,27 +53,25 @@ app.get('/vehicles/:vehicleId', (req, res) => {
   const vehicle = data.vehicles.find(v => v.id === Number(req.params.vehicleId));
   if (!vehicle) return res.status(404).json({ error: 'Vehicle not found' });
 
-  const vehiclePings = data.pings
-    .filter(p => p.vehicle_id === vehicle.id)
-    .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-
-  const lastPing = vehiclePings.length
-    ? {
-      ping_id: String(vehiclePings[0].id),
-      vehicle_id: String(vehiclePings[0].vehicle_id),
-      timestamp: vehiclePings[0].timestamp,
-      lat: vehiclePings[0].latitude,
-      lng: vehiclePings[0].longitude,
-      speed: 0
-    }
-    : null;
+  const latestPing = data.pings
+    .filter(ping => ping.vehicle_id === vehicle.id)
+    .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))[0] || null;
 
   res.json({
-    vehicle_id: String(vehicle.id),
+    vehicle_id: vehicle.id,
     reg_number: vehicle.register_number,
     device_id: vehicle.device_id,
-    station_id: String(vehicle.station_id),
-    last_ping: lastPing
+    station_id: vehicle.station_id,
+    last_ping: latestPing
+      ? {
+        ping_id: latestPing.id,
+        vehicle_id: latestPing.vehicle_id,
+        timestamp: latestPing.timestamp,
+        lat: latestPing.latitude,
+        lng: latestPing.longitude,
+        speed: 0
+      }
+      : null
   });
 });
 
@@ -87,15 +85,17 @@ app.get('/vehicles/:vehicleId/pings', (req, res) => {
 app.get('/vehicles/:vehicleId/last-position', (req, res) => {
   const vehicle = data.vehicles.find(v => v.id === Number(req.params.vehicleId));
   if (!vehicle) return res.status(404).json({ error: 'Vehicle not found' });
-  const pings = data.pings
+  const latestPing = data.pings
     .filter(p => p.vehicle_id === vehicle.id)
-    .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-  if (!pings.length) return res.status(404).json({ error: 'No pings found for this vehicle' });
+    .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))[0];
+
+  if (!latestPing) return res.status(404).json({ error: 'No pings found for this vehicle' });
+
   res.json({
-    vehicle_id: String(pings[0].vehicle_id),
-    timestamp: pings[0].timestamp,
-    lat: pings[0].latitude,
-    lng: pings[0].longitude,
+    vehicle_id: latestPing.vehicle_id,
+    timestamp: latestPing.timestamp,
+    lat: latestPing.latitude,
+    lng: latestPing.longitude,
     speed: 0
   });
 });
