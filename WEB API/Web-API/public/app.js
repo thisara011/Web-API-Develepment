@@ -23,9 +23,33 @@ const elements = {
 
 const formatJson = (value) => JSON.stringify(value, null, 2);
 
+const STATUS_TEXT = {
+    101: 'Switching Protocols',
+    200: 'OK',
+    201: 'Created',
+    204: 'No Content',
+    400: 'Bad Request',
+    401: 'Unauthorized',
+    403: 'Forbidden',
+    404: 'Not Found',
+    409: 'Conflict',
+    422: 'Unprocessable Entity',
+    500: 'Internal Server Error',
+    502: 'Bad Gateway',
+    503: 'Service Unavailable',
+};
+
+const getStatusText = (statusCode) => STATUS_TEXT[statusCode] || 'Unknown Status';
+
 const showResponse = (value) => {
     elements.responseOutput.textContent = typeof value === 'string' ? value : formatJson(value);
 };
+
+const toErrorPayload = (error) => ({
+    status: error.status || 500,
+    status_text: getStatusText(error.status || 500),
+    error: error.message || 'Request failed',
+});
 
 const buildUrl = () => {
     if (!routeState.detailRoute) {
@@ -35,7 +59,9 @@ const buildUrl = () => {
     const id = elements.resourceId.value.trim();
 
     if (!id) {
-        throw new Error('Enter a resource ID for the selected detail route.');
+        const error = new Error('Enter a resource ID for the selected detail route.');
+        error.status = 400;
+        throw error;
     }
 
     return routeState.detailRoute.replace(':id', id);
@@ -46,7 +72,10 @@ const fetchJson = async (url) => {
     const payload = await response.json();
 
     if (!response.ok) {
-        throw new Error(payload.error || `Request failed with status ${response.status}`);
+        const error = new Error(payload.error || `Request failed with status ${response.status}`);
+        error.status = payload.status || response.status;
+        error.statusText = payload.status_text || getStatusText(error.status);
+        throw error;
     }
 
     return payload;
@@ -121,7 +150,8 @@ const wireEndpointButtons = () => {
                 showResponse(payload);
                 elements.routeHint.textContent = `Current route: ${button.dataset.endpoint}`;
             } catch (error) {
-                showResponse({ error: error.message });
+                showResponse(toErrorPayload(error));
+                elements.routeHint.textContent = `Request failed (${error.status || 500})`;
             }
         });
     });
@@ -134,8 +164,8 @@ const wireControls = () => {
         try {
             await loadSelection();
         } catch (error) {
-            showResponse({ error: error.message });
-            elements.routeHint.textContent = 'Fix the route selection and try again.';
+            showResponse(toErrorPayload(error));
+            elements.routeHint.textContent = `Request failed (${error.status || 500})`;
         }
     });
 
@@ -144,7 +174,8 @@ const wireControls = () => {
             await loadAllCollections();
             elements.routeHint.textContent = 'Current route: all collections';
         } catch (error) {
-            showResponse({ error: error.message });
+            showResponse(toErrorPayload(error));
+            elements.routeHint.textContent = `Request failed (${error.status || 500})`;
         }
     });
 
@@ -162,7 +193,8 @@ const wireControls = () => {
             showResponse(vehicles);
             setRoute('/vehicles');
         } catch (error) {
-            showResponse({ error: error.message });
+            showResponse(toErrorPayload(error));
+            elements.routeHint.textContent = `Request failed (${error.status || 500})`;
         }
     });
 
@@ -170,7 +202,9 @@ const wireControls = () => {
         try {
             const vehicles = await fetchJson('/vehicles');
             if (!vehicles.length) {
-                throw new Error('No vehicles are available in the data set.');
+                const error = new Error('No vehicles are available in the data set.');
+                error.status = 404;
+                throw error;
             }
 
             elements.resourceId.value = vehicles[0].vehicle_id;
@@ -178,7 +212,8 @@ const wireControls = () => {
             syncDetailHint();
             await loadSelection();
         } catch (error) {
-            showResponse({ error: error.message });
+            showResponse(toErrorPayload(error));
+            elements.routeHint.textContent = `Request failed (${error.status || 500})`;
         }
     });
 };
@@ -194,7 +229,7 @@ const boot = async () => {
         elements.routeHint.textContent = 'Current route: /provinces';
     } catch (error) {
         elements.apiStatus.textContent = 'API unavailable';
-        showResponse({ error: error.message });
+        showResponse(toErrorPayload(error));
         elements.routeHint.textContent = 'Check whether the server is running.';
     }
 };
