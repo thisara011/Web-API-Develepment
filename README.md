@@ -142,6 +142,18 @@ Open:
 - Dashboard: `http://localhost:3000/`
 - API status: `http://localhost:3000/api`
 
+## GitHub Pages Deployment Note
+
+GitHub Pages can host only static files. It cannot run the Node.js/Express server in `WEB API/Web-API/index.js`.
+
+To make your site usable on GitHub Pages, this repository now includes a static root app:
+
+- `index.html`
+- `app.js`
+- `styles.css`
+
+This static app emulates your API routes in the browser using `WEB API/Web-API/seedTuk.json` and mirrors the backend response shapes.
+
 ## Testing the API Quickly
 
 Use a browser, Postman, or curl:
