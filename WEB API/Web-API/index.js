@@ -1,12 +1,19 @@
 const express = require('express');
+const path = require('path');
 const data = require('./seedTuk.json');
 
 const app = express();
 const port = process.env.PORT || 3000;
 
-app.get('/', (req, res) => {
+app.get('/api', (req, res) => {
   res.json({ status: 'ok', session: 'NB6007CEM S2' });
 });
+
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+app.use(express.static(path.join(__dirname, 'public')));
 
 app.get('/provinces', (req, res) => {
   res.json(data.provinces.map(p => ({ province_id: p.id, name: p.name })));

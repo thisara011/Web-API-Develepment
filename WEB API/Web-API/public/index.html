@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Web API Explorer</title>
+    <link rel="stylesheet" href="/styles.css" />
+</head>
+
+<body>
+    <div class="bg-orb orb-one"></div>
+    <div class="bg-orb orb-two"></div>
+
+    <main class="shell">
+        <section class="hero card">
+            <div>
+                <p class="eyebrow">COBSCCOMP25.1P-051 · Index 75</p>
+                <h1>Web API Explorer</h1>
+                <p class="lede">
+                    A visual guide to the Express API in this project. Use the controls below to inspect provinces,
+                    districts, stations, vehicles, and vehicle positions.
+                </p>
+            </div>
+
+            <div class="hero-meta">
+                <div class="status-pill" id="apiStatus">Checking API status...</div>
+                <p>
+                    Root docs now live in the browser, while <code>/api</code> keeps the JSON status response.
+                </p>
+            </div>
+        </section>
+
+        <section class="stats-grid" id="statsGrid">
+            <article class="stat-card card">
+                <span>Provinces</span>
+                <strong id="provinceCount">-</strong>
+            </article>
+            <article class="stat-card card">
+                <span>Districts</span>
+                <strong id="districtCount">-</strong>
+            </article>
+            <article class="stat-card card">
+                <span>Stations</span>
+                <strong id="stationCount">-</strong>
+            </article>
+            <article class="stat-card card">
+                <span>Vehicles</span>
+                <strong id="vehicleCount">-</strong>
+            </article>
+        </section>
+
+        <section class="layout">
+            <article class="card explorer">
+                <div class="section-head">
+                    <div>
+                        <p class="section-label">API Explorer</p>
+                        <h2>Choose an endpoint</h2>
+                    </div>
+                    <button class="ghost-button" id="loadAllButton" type="button">Load collections</button>
+                </div>
+
+                <div class="endpoint-grid">
+                    <button class="endpoint-button active" data-endpoint="/provinces" type="button">Provinces</button>
+                    <button class="endpoint-button" data-endpoint="/districts" type="button">Districts</button>
+                    <button class="endpoint-button" data-endpoint="/stations" type="button">Stations</button>
+                    <button class="endpoint-button" data-endpoint="/vehicles" type="button">Vehicles</button>
+                </div>
+
+                <div class="field-row">
+                    <label>
+                        Resource ID
+                        <input id="resourceId" type="number" min="1" placeholder="Enter an ID to inspect" />
+                    </label>
+
+                    <label>
+                        Detail route
+                        <select id="detailRoute">
+                            <option value="">Collection only</option>
+                            <option value="/provinces/:id">Province by ID</option>
+                            <option value="/districts/:id">District by ID</option>
+                            <option value="/stations/:id">Station by ID</option>
+                            <option value="/vehicles/:id">Vehicle by ID</option>
+                            <option value="/vehicles/:id/pings">Vehicle pings</option>
+                            <option value="/vehicles/:id/last-position">Vehicle last position</option>
+                        </select>
+                    </label>
+                </div>
+
+                <div class="action-row">
+                    <button class="primary-button" id="loadSelectionButton" type="button">Load response</button>
+                    <button class="secondary-button" id="clearButton" type="button">Clear</button>
+                </div>
+
+                <div class="route-hint" id="routeHint">Current route: /provinces</div>
+            </article>
+
+            <aside class="card guide">
+                <p class="section-label">How it works</p>
+                <h2>Understand the project fast</h2>
+                <ol>
+                    <li>The server loads local data from <code>seedTuk.json</code>.</li>
+                    <li>Each route returns JSON for one resource type.</li>
+                    <li>The dashboard calls those routes with <code>fetch()</code>.</li>
+                    <li>Errors are shown directly in the response viewer.</li>
+                </ol>
+                <div class="mini-note">
+                    The UI is intentionally simple: it is here to help you inspect the API structure and the data flow.
+                </div>
+            </aside>
+        </section>
+
+        <section class="card response-panel">
+            <div class="section-head">
+                <div>
+                    <p class="section-label">Response</p>
+                    <h2>Live JSON output</h2>
+                </div>
+                <div class="inline-actions">
+                    <button class="ghost-button" id="sampleVehiclesButton" type="button">Open vehicle list</button>
+                    <button class="ghost-button" id="sampleLastPositionButton" type="button">Open last position</button>
+                </div>
+            </div>
+
+            <pre id="responseOutput" class="response-output">Select an endpoint to begin.</pre>
+        </section>
+    </main>
+
+    <script src="/app.js"></script>
+</body>
+
+</html>
